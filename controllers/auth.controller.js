@@ -1,4 +1,4 @@
-const { Enterprise } = require("../models");
+const { Enterprise, Employee } = require("../models");
 const { getToken, getTokenData } = require("../config/jwt.config");
 
 const usersController = {
@@ -64,12 +64,29 @@ const usersController = {
           status: false,
           msg: "Contraseña incorrecta!",
         });
-      } else {
-        res.status(404).send({
+      }
+      user = await Employee.findOne({ name });
+      if (!user) user = await Employee.findOne({ email: name });
+      if (user) {
+        const result = await user.comparePassword(password);
+        if (result) {
+          let token = getToken({ name: user.name });
+          return res.send({
+            status: true,
+            msg: "Inicio de sesión exitoso!",
+            token,
+            user,
+          });
+        }
+        return res.status(400).send({
           status: false,
-          msg: "Usuario no registrado!",
+          msg: "Contraseña incorrecta!",
         });
       }
+      res.status(404).send({
+        status: false,
+        msg: "Usuario no registrado!",
+      });
     } catch (error) {
       console.log(error);
       res.status(400).send({

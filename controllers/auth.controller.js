@@ -4,31 +4,31 @@ const { getToken, getTokenData } = require("../config/jwt.config");
 const usersController = {
   register: async (req, res) => {
     try {
-      const { body } = req;
-      let user = (await Enterprise.findOne({ name: body.name })) || null;
+      const { data } = req.body;
+      let user = (await Enterprise.findOne({ name: data.name })) || null;
 
       if (user) {
         return res.status(400).send({
-          success: false,
+          status: false,
           msg: "La empresa ya existe",
         });
       }
 
-      const newUser = await Enterprise(body);
+      const newUser = await Enterprise(data);
 
       if (!newUser) {
         res.status(404).send({
-          success: false,
+          status: false,
           msg: "Error al registrar usuario",
         });
       } else {
         const token = getToken({
-          name: body.name,
-          password: body.password,
+          name: data.name,
+          password: data.password,
         });
         const userStored = await newUser.save();
         res.status(200).send({
-          success: true,
+          status: true,
           msg: "Usuario Registrado!",
           token,
           newUser: userStored,
@@ -37,7 +37,7 @@ const usersController = {
     } catch (error) {
       console.log(error);
       res.status(409).send({
-        success: false,
+        status: false,
         msg: "Error al registrar",
         error: error,
       });
@@ -47,31 +47,33 @@ const usersController = {
   login: async (req, res) => {
     try {
       const { name, password } = req.body;
-      const user = await Enterprise.findOne({ name, password });
+      let user = await Enterprise.findOne({ name });
+      if (!user) user = await Enterprise.findOne({ email: name });
       if (user) {
         const result = await user.comparePassword(password);
         if (result) {
           let token = getToken({ name: user.name });
           return res.send({
-            success: true,
+            status: true,
             msg: "Inicio de sesión exitoso!",
             token,
+            user,
           });
         }
         return res.status(400).send({
-          success: false,
+          status: false,
           msg: "Contraseña incorrecta!",
         });
       } else {
         res.status(404).send({
-          success: false,
+          status: false,
           msg: "Usuario no registrado!",
         });
       }
     } catch (error) {
       console.log(error);
       res.status(400).send({
-        success: true,
+        status: false,
         error,
       });
     }
@@ -90,15 +92,15 @@ const usersController = {
           name: decodedToken.data.name,
         });
         if (user) {
-          res.status(200).send({ success: true, user });
+          res.status(200).send({ status: true, user });
         } else {
-          res.status(404).send({ succes: false, auth: "no auth, no user" });
+          res.status(404).send({ status: false, auth: "no auth, no user" });
         }
       } else {
-        res.status(400).send({ succes: false, auth: "no auth" });
+        res.status(400).send({ status: false, auth: "no auth" });
       }
     } catch (error) {
-      res.status(400).send({ succes: false, auth: "no token" });
+      res.status(400).send({ status: false, auth: "no token" });
     }
   },
 };

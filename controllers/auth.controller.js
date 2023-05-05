@@ -58,6 +58,7 @@ const usersController = {
             msg: "Inicio de sesión exitoso!",
             token,
             user,
+            role: 0
           });
         }
         return res.status(400).send({
@@ -76,6 +77,7 @@ const usersController = {
             msg: "Inicio de sesión exitoso!",
             token,
             user,
+            role: 1
           });
         }
         return res.status(400).send({

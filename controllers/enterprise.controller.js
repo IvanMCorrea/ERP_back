@@ -3,6 +3,25 @@ const { Enterprise, Employee, Invitation } = require("../models");
 const nodeMailer = require("nodemailer");
 
 const enterpriseController = {
+  getEmployees: async (req, res) => {
+    try {
+      const {enterpriseId} = req.params;
+
+      const users = await Employee.find({enterprise: enterpriseId});
+
+      res.status(200).send({
+          status: true,
+          message: 'Employees obtained correctly.',
+          data: users
+      });
+      } catch (error) {
+          res.status(500).send({
+              status: false,
+              message: error.message
+          });
+      }
+  },
+
   inviteEmployee: async (req, res) => {
     try {
       const { id } = req.params;
@@ -38,7 +57,7 @@ const enterpriseController = {
         }); 
       }
 
-      if (enterprise.employees.length <= 2) { //TODO: agregar limite de usuarios por empresa
+      if (enterprise.employees.length <= 2) { //?: revisar limite de usuarios por empresa
         const transporter = await nodeMailer.createTransport({
           host: process.env.MAIL_HOST,
           port: process.env.MAIL_PORT,

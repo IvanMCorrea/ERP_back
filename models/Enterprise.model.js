@@ -26,6 +26,12 @@ const EnterpriseScheme = new mongoose.Schema(
     address: {
       type: String,
     },
+    employees: [
+      {
+        type: mongoose.ObjectId,
+        ref: "Employee"
+      }
+    ],
     status: {
       type: String,
     },

@@ -23,6 +23,10 @@ const EmployeeScheme = new mongoose.Schema(
     description: {
       type: String,
     },
+    enterprise: {
+      type: mongoose.ObjectId,
+      ref: "Enterprise"
+    },
     address: {
       type: String,
     },
